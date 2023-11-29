@@ -43,7 +43,7 @@ def map():
         return
 
     st.markdown(
-        "<img src='app/static/amexlogo.png' width='160' />,<img src='app/static/pickabagel.png' width='160' />", unsafe_allow_html=True
+        "<img src='app/static/amexlogo.png' width='160' />  <img src='app/static/pickabagel.png' width='160' />", unsafe_allow_html=True
     )
     
     st.header(location["name"])
