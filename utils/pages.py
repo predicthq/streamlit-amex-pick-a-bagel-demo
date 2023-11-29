@@ -3,7 +3,7 @@ import streamlit as st
 
 def set_page_config(title=""):
     st.set_page_config(
-        page_title=title if len(title) > 0 else "PredictHQ Restaurant Demo App",
+        page_title=title if len(title) > 0 else "PredictHQ Amex Pick a Bagel Demo App",
         page_icon="🥯",
         layout="wide",
         initial_sidebar_state="expanded",
