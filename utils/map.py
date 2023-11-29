@@ -80,8 +80,8 @@ def show_map(lat, lon, radius_meters, events):
                             "radius": radius_meters,
                             "icon_data": {
                                 "url": "app/static/bagel.png",
-                                "width": 250,
-                                "height": 250,
+                                "width": 500,
+                                "height": 500,
                             },
                         }
                     ],
