@@ -87,7 +87,7 @@ def show_map(lat, lon, radius_meters, events):
                     ],
                     get_position="coordinates",
                     get_icon="icon_data",
-                    get_size=30,
+                    get_size=50,
                     pickable=False,
                 ),
                 # Point-type events layer
