@@ -80,14 +80,14 @@ def show_map(lat, lon, radius_meters, events):
                             "radius": radius_meters,
                             "icon_data": {
                                 "url": "app/static/bagel.png",
-                                "width": 160,
-                                "height": 160,
+                                "width": 250,
+                                "height": 250,
                             },
                         }
                     ],
                     get_position="coordinates",
                     get_icon="icon_data",
-                    get_size=20,
+                    get_size=30,
                     pickable=False,
                 ),
                 # Point-type events layer
