@@ -7,6 +7,7 @@ from utils.metrics import show_metrics
 from utils.predicthq import (
     get_api_key,
     fetch_events,
+    fetch_event_spend_total,
     ATTENDED_CATEGORIES,
     NON_ATTENDED_CATEGORIES,
     UNSCHEDULED_CATEGORIES,
@@ -15,6 +16,7 @@ from utils.map import show_map
 
 
 def main():
+
     set_page_config("Map")
     show_sidebar_options()
 
@@ -27,6 +29,11 @@ def main():
 def map():
     location = st.session_state.location if "location" in st.session_state else None
     daterange = st.session_state.daterange if "daterange" in st.session_state else None
+    if (daterange is not None):
+        # Pull out date range to make them easier to work with
+        date_from = daterange["date_from"]
+        date_to = daterange["date_to"]
+
     suggested_radius = (
         st.session_state.suggested_radius
         if "suggested_radius" in st.session_state
@@ -41,12 +48,40 @@ def map():
         or radius is None
     ):
         return
-
-    st.markdown(
-        "<img src='app/static/amexlogo.png' width='160' />  <img src='app/static/pickabagel.png' width='160' />", unsafe_allow_html=True
-    )
     
-    st.header(location["name"])
+    total_event_spend = fetch_event_spend_total(
+            location["lat"],
+            location["lon"],
+            radius,
+            date_from=date_from,
+            date_to=date_to,
+            tz=location["tz"],
+        )
+    # st.markdown(
+    #     "<img src='app/static/amexlogo.png' width='140' />  <img src='app/static/pickabagel.png' width='160' />", unsafe_allow_html=True
+    # )
+    st.title("Store Location : " +location["address"])
+    # st.divider()
+    st.header("Total Predicted Event Spend : ${:,}".format(total_event_spend["spend_total"]))
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            label="Hospitality Spend",
+            value="${:,}".format(total_event_spend["spend_hospo"]),
+        )
+        
+    with col2:
+        st.metric(
+            label="Accommodation Spend",
+            value="${:,}".format(total_event_spend["spend_accom"]),
+        )
+    with col3:
+        st.metric(
+            label="Transportation Spend",
+            value="${:,}".format(total_event_spend["spend_trans"]),
+        )
 
     # Display metrics
     show_metrics()
@@ -114,29 +149,38 @@ def show_events_list(events, filename="events"):
         )
 
         row = {
-            "id": event["id"],
-            "title": event["title"],
-            "phq_attendance": event["phq_attendance"] if event["phq_attendance"] else 0,
-            "category": event["category"],
-            "start_date_local": event["start"]
-            .astimezone(pytz.timezone(event["timezone"]))
-            .isoformat()
+            # "id": event["id"],
+            "Title": event["title"],
+            "Predicted Attendance": event["phq_attendance"] if event["phq_attendance"] else 0,
+            "Category": event["category"],
+            "Venue": venue["name"] if venue else "",
+            "Start Date": event["start"]
+            .astimezone(pytz.timezone(event["timezone"])).strftime('%Y-%m-%d %H:%M:%S')
             if event["timezone"] is not None
-            else event["start"].isoformat(),
-            "end_date_local": event["end"]
-            .astimezone(pytz.timezone(event["timezone"]))
-            .isoformat()
+            else event["start"].strftime('%Y-%m-%d %H:%M:%S'),
+            "End Date": event["end"]
+            .astimezone(pytz.timezone(event["timezone"])).strftime('%Y-%m-%d %H:%M:%S')
             if event["timezone"] is not None
-            else event["end"].isoformat(),
-            "predicted_end_date_local": event["predicted_end"]
-            .astimezone(pytz.timezone(event["timezone"]))
-            .isoformat()
+            else event["end"].strftime('%Y-%m-%d %H:%M:%S'),
+            "Predicted End Date": event["predicted_end"]
+            .astimezone(pytz.timezone(event["timezone"])).strftime('%Y-%m-%d %H:%M:%S')
             if "predicted_end" in event
             and event["predicted_end"] is not None
             and event["timezone"] is not None
             else "",
-            "venue_name": venue["name"] if venue else "",
-            "venue_address": venue["formatted_address"] if venue else "",
+            "Hospitality Spend": "${:,}".format(event["predicted_event_spend_industries"]["hospitality"])
+            if "predicted_event_spend_industries"  in event
+            and event["predicted_event_spend_industries"] is not None
+            else "",
+            "Accommodation Spend": "${:,}".format(event["predicted_event_spend_industries"]["accommodation"])
+            if "predicted_event_spend_industries"  in event
+            and event["predicted_event_spend_industries"] is not None
+            else "",
+            "Transportation Spend": "${:,}".format(event["predicted_event_spend_industries"]["transportation"])
+            if "predicted_event_spend_industries"  in event
+            and event["predicted_event_spend_industries"] is not None
+            else "",            
+            # "venue_address": venue["formatted_address"] if venue else "",
             "placekey": event["geo"]["placekey"]
             if "geo" in event and "placekey" in event["geo"]
             else "",

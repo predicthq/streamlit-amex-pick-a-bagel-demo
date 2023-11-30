@@ -6,7 +6,17 @@ from utils.code_examples import get_code_example
 
 
 def show_sidebar_options():
+    st.sidebar.image("./static/amex-bagel.png")
     locations = [
+        {
+            "id": "8th-ave",
+            "name": "8th Ave",
+            "address": "891 8th Ave, New York",
+            "lat": 40.7644561,
+            "lon": -73.9849363,
+            "tz": "America/New_York",
+            "units": "imperial",
+        },
         {
             "id": "2nd-ave",
             "name": "2nd Ave",
@@ -31,15 +41,6 @@ def show_sidebar_options():
             "address": "39 West End Ave, New York",
             "lat": 40.7732841,
             "lon": -73.9895836,
-            "tz": "America/New_York",
-            "units": "imperial",
-        },
-        {
-            "id": "8th-ave",
-            "name": "8th Ave",
-            "address": "891 8th Ave, New York",
-            "lat": 40.7644561,
-            "lon": -73.9849363,
             "tz": "America/New_York",
             "units": "imperial",
         },

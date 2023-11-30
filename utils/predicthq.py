@@ -137,7 +137,6 @@ def fetch_events(
         limit=200,
         sort="phq_attendance",
     )
-
     return events.to_dict()
 
 
@@ -174,3 +173,45 @@ def calc_sum_of_event_counts(counts_result, categories):
     counts = {k: v for k, v in counts_result["categories"].items() if k in categories}
 
     return sum(counts.values())
+
+@st.cache_data
+def fetch_event_spend_total(lat, lon, radius, date_from, date_to, tz="UTC", radius_unit="mi"):
+    radius_value = f"{radius}{radius_unit}"
+
+    r = requests.post(
+        url="https://api.predicthq.com/v1/features/",
+        json={"active":{"gte":str(date_from),"lte":str(date_to)},"location":{"geo":{"lat":lat,"lon":lon,"radius":radius_value}},"phq_spend_community_accommodation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_community_transportation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_community_hospitality":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_concerts_accommodation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_concerts_transportation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_concerts_hospitality":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_conferences_accommodation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_conferences_transportation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_conferences_hospitality":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_expos_accommodation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_expos_transportation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_expos_hospitality":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_festivals_accommodation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_festivals_transportation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_festivals_hospitality":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_performing_arts_accommodation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_performing_arts_transportation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_performing_arts_hospitality":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_sports_accommodation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_sports_transportation":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}},"phq_spend_sports_hospitality":{"stats":["sum"],"phq_rank":{"gte":0,"lte":100}}},
+        headers={
+            "Authorization": f"Bearer {get_api_key()}",
+            "Accept": "application/json",
+        },
+        allow_redirects=True,
+    )
+
+    spend_hospo=0
+    spend_accom=0
+    spend_trans=0
+    for item in r.json()["results"]:
+        spend_hospo += item["phq_spend_conferences_hospitality"]["stats"]["sum"]
+        spend_hospo += item["phq_spend_expos_hospitality"]["stats"]["sum"]
+        spend_hospo += item["phq_spend_sports_hospitality"]["stats"]["sum"]
+        spend_hospo += item["phq_spend_community_hospitality"]["stats"]["sum"]
+        spend_hospo += item["phq_spend_concerts_hospitality"]["stats"]["sum"]
+        spend_hospo += item["phq_spend_festivals_hospitality"]["stats"]["sum"]
+        spend_hospo += item["phq_spend_performing_arts_hospitality"]["stats"]["sum"]
+        spend_accom += item["phq_spend_conferences_accommodation"]["stats"]["sum"]
+        spend_accom += item["phq_spend_expos_accommodation"]["stats"]["sum"]
+        spend_accom += item["phq_spend_sports_accommodation"]["stats"]["sum"]
+        spend_accom += item["phq_spend_community_accommodation"]["stats"]["sum"]
+        spend_accom += item["phq_spend_concerts_accommodation"]["stats"]["sum"]
+        spend_accom += item["phq_spend_festivals_accommodation"]["stats"]["sum"]
+        spend_accom += item["phq_spend_performing_arts_accommodation"]["stats"]["sum"]
+        spend_trans += item["phq_spend_conferences_transportation"]["stats"]["sum"]
+        spend_trans += item["phq_spend_expos_transportation"]["stats"]["sum"]
+        spend_trans += item["phq_spend_sports_transportation"]["stats"]["sum"]
+        spend_trans += item["phq_spend_community_transportation"]["stats"]["sum"]
+        spend_trans += item["phq_spend_concerts_transportation"]["stats"]["sum"]
+        spend_trans += item["phq_spend_festivals_transportation"]["stats"]["sum"]
+        spend_trans += item["phq_spend_performing_arts_transportation"]["stats"]["sum"]
+
+    return {"spend_total":spend_trans+spend_accom+spend_hospo,"spend_hospo":spend_hospo,"spend_accom":spend_accom,"spend_trans":spend_trans}

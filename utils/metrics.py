@@ -7,6 +7,7 @@ from utils.predicthq import (
     fetch_event_counts,
     calc_sum_of_features,
     calc_sum_of_event_counts,
+    fetch_event_spend_total,
     ATTENDED_CATEGORIES,
     NON_ATTENDED_CATEGORIES,
     PHQ_ATTENDANCE_FEATURES,
@@ -119,7 +120,7 @@ def show_metrics():
         )
         previous_demand_surges_count = len(previous_demand_surges)
 
-        # Display metrics
+        st.divider()
         col1, col2, col3, col4, col5, col6 = st.columns(6)
 
         with col1:
