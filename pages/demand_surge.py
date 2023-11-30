@@ -43,7 +43,7 @@ def demand_surge():
     ):
         return
 
-    st.header(location["name"])
+    st.title("Store Location : " +location["address"])
 
     # Display metrics
     show_metrics()
